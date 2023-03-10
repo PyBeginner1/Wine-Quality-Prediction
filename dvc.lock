@@ -23,24 +23,24 @@ stages:
       md5: ccc8d3507eb151f53f760d36abdef888
       size: 91998
     - path: src/split_data.py
-      md5: d9396267840c0508926b98b89c484198
-      size: 972
+      md5: da62ed2450ef0a37aad2af9319792093
+      size: 998
     outs:
     - path: data/processed/test_winequality.csv
-      md5: 61c8795e355c18440d7bbaae25c0a4fb
-      size: 20213
+      md5: 01718da3bd6e206060ed00667ca1a389
+      size: 18831
     - path: data/processed/train_winequality.csv
-      md5: f2aa3bd0c97468b7110f957a1ed59f54
-      size: 80418
+      md5: 4bccf4d668cdc60115de42ba74d416ab
+      size: 74913
   train_and_evaluate:
     cmd: python src/train_and_evaluate.py --config=params.yaml
     deps:
     - path: data/processed/test_winequality.csv
-      md5: 61c8795e355c18440d7bbaae25c0a4fb
-      size: 20213
+      md5: 01718da3bd6e206060ed00667ca1a389
+      size: 18831
     - path: data/processed/train_winequality.csv
-      md5: f2aa3bd0c97468b7110f957a1ed59f54
-      size: 80418
+      md5: 4bccf4d668cdc60115de42ba74d416ab
+      size: 74913
     - path: src/train_and_evaluate.py
       md5: 94c024ae9405a32cf8cd98e763e1d703
       size: 2601
@@ -53,8 +53,8 @@ stages:
       md5: 0cc8a4af1490d2c9f042b9af44d37fc7
       size: 32
     - path: report/scores.json
-      md5: 45f3debbb5f8ea2242b821238ee30745
+      md5: 644e98cf0b49dc8413c0e70f4f026c2c
       size: 87
     - path: saved_models/model.joblib
-      md5: ad05dbb5f9285d1b6aa45731740bb5f1
-      size: 1393
+      md5: 967a427b6b589e2b5daadd01a4969747
+      size: 1215

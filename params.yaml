@@ -28,3 +28,4 @@ reports:
   scores: report/scores.json
 
 webapp_model_dir: prediction_service/model/model.joblib
+webapp_model_dir1: saved_models/model.joblib

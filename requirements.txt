@@ -5,4 +5,8 @@ pandas
 pyyaml
 pytest
 tox
+flask
+gunicorn
+
+
 -e .

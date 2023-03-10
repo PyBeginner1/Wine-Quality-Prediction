@@ -18,8 +18,8 @@ def split_and_save(config_path):
     df = pd.read_csv(raw_data_path)
     train, test = train_test_split(df, test_size=split_ratio, random_state=random_state)
 
-    train.to_csv(train_data_path)
-    test.to_csv(test_data_path)
+    train.to_csv(train_data_path, index=False)
+    test.to_csv(test_data_path, index=False)
 
 
 if __name__ =='__main__':
