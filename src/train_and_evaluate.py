@@ -12,9 +12,18 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import ElasticNet
 from get_data import read_params
+from urllib.parse import urlparse
 import argparse
 import joblib
 import json
+import mlflow
+
+
+def eval_metrics(actual, predicted):
+        rmse = np.sqrt(mean_squared_error(actual, predicted))
+        mae = mean_absolute_error(actual, predicted)
+        r2 = r2_score(actual, predicted)
+        return rmse, mae, r2
 
 
 def train_and_evaluate(config_path):
@@ -37,52 +46,41 @@ def train_and_evaluate(config_path):
     y_train = train[target]
     y_test = test[target]
 
-    model = ElasticNet(alpha = alpha, l1_ratio=l1_ratio, random_state=random_state)
+    mlflow_config = config["mlflow_config"]
+    remote_server_uri = mlflow_config["remote_server_uri"]
 
-    model.fit(X_train, y_train)
+    mlflow.set_tracking_uri(remote_server_uri)
 
-    predict = model.predict(X_test)
+    mlflow.set_experiment(mlflow_config["experiment_name"])
 
-    rmse, mae, r2 = eval_metrics(y_test, predict)
+    with mlflow.start_run(run_name=mlflow_config["run_name"]) as mlops_run:
+        model = ElasticNet(alpha = alpha, l1_ratio=l1_ratio, random_state=random_state)
+        model.fit(X_train, y_train)
 
-    print(f"Elastic Net Model(alpha: {alpha}, l1_ratio: {l1_ratio})")
-    print(f"Root Mean Squared Error: {rmse}")
-    print(f"Mean Absolute Error: {mae}")
-    print(f"R2 Score: {r2}")
+        predict = model.predict(X_test)
 
-    os.makedirs("report", exist_ok=True)
+        rmse, mae, r2 = eval_metrics(y_test, predict)
 
-    with open(scores_file, "w") as f:
-        scores = {
-            "RMSE" : rmse,
-            "MAE": mae,
-            "R2Score": r2
-        }
-        json.dump(scores, f)
+        mlflow.dvc.log_param("Alpha", alpha)
+        mlflow.dvc.log_param("l1_ratio", l1_ratio)
+        mlflow.dvc.log_metric("RMSE", rmse)
+        mlflow.dvc.log_metric("MAE", mae)
+        mlflow.dvc.log_metric("R2 Score", r2)
 
-    with open(params_file, "w") as f:
-        params = {
-            "alpha": alpha,
-            "l1_ratio": l1_ratio
-        }
-        json.dump(params, f)
+        tracking_url_type_store = urlparse(mlflow.get_artifact_uri()).scheme
 
-
-    os.makedirs(model_dir, exist_ok =True)
-    model_path = os.path.join(model_dir,"model.joblib")
-    joblib.dump(model, model_path)
-
-
-def eval_metrics(actual, predicted):
-    rmse = np.sqrt(mean_squared_error(actual, predicted))
-    mae = mean_absolute_error(actual, predicted)
-    r2 = r2_score(actual, predicted)
-    return rmse, mae, r2
+        if tracking_url_type_store != "file":
+            mlflow.sklearn.log_model(
+                model, 
+                "model", 
+                registered_model_name=mlflow_config["registered_model_name"])
+        else:
+            mlflow.sklearn.load_model(model, "model")
 
 
 
-if __name__ == '__main__':
-    args = argparse.ArgumentParser()
-    args.add_argument('--config', default="params.yaml")
-    parsed_args = args.parse_args()
-    train_and_evaluate(config_path=parsed_args.config)
+    if __name__ == '__main__':
+        args = argparse.ArgumentParser()
+        args.add_argument('--config', default="params.yaml")
+        parsed_args = args.parse_args()
+        train_and_evaluate(config_path=parsed_args.config)

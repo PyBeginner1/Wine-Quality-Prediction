@@ -69,3 +69,14 @@ pip install -e .
 build your own package commands- 
 ```bash
 python setup.py sdist bdist_wheel
+
+
+---
+Create artifacts folder
+
+mlflow server command
+
+mlflow server \
+    --backend-store-uri sqlite:///mlflow.db \
+    --default-artifact-root ./artifacts \
+    --host 0.0.0.0(Run ipconfig in cmd and paste the IPv4 address) -p 1234

@@ -7,6 +7,6 @@ pytest
 tox
 flask
 gunicorn
-
+mlflow
 
 -e .
