@@ -36,8 +36,9 @@ def form_response(dict_request):
     if validate_input(dict_request):
         data = dict_request.values()
         data = [list(map(float, data))]
-        response = prediction(data)
+        response = predict(data)
         return response
+    
 
 
 def read_params(config_path):
@@ -46,7 +47,7 @@ def read_params(config_path):
     return config
 
 
-def prediction(data):
+def predict(data):
     try:
         config = read_params(params_path)
         if not os.listdir(check_dir):
@@ -61,19 +62,26 @@ def prediction(data):
             else:
                 raise NotInRange
         except Exception as e:
-            return "Unexpected result"
+            return "Values entered not in range"
     except Exception as e:
         raise e
     
 
-def api_response(request):
+def api_response(dict_request):
     try:
-        data = np.array(list(request.form.values()))
-        response = prediction(data)
-        response = {'response': response}
+        if validate_input(dict_request):
+            data = np.array([list(dict_request.values())])
+            response = predict(data)
+            response = {"response": response}
+            return response
+            
+    except NotInRange as e:
+        response = {"the_exected_range": get_schema(), "response": str(e) }
         return response
-    except Exception as e:
-        raise e
+
+    except NotInColumn as e:
+        response = {"the_exected_cols": get_schema().keys(), "response": str(e) }
+        return response
     
 
 def get_schema(schema_path=schema_path):

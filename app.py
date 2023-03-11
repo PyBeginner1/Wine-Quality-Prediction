@@ -3,7 +3,7 @@ import os
 import yaml
 import joblib
 import numpy as np
-from prediction_service import prediction, api_response, form_response
+from prediction_service.prediction import predict, api_response, form_response
 
 webapp_root = "webapp"
 
@@ -27,7 +27,7 @@ def index():
                 return jsonify(response)
         except Exception as e:
             print(e)
-            error = {"error": "Something went wrong. Try again!!!"}
+            error = {"error": e}
             return render_template("404.html",error=error)
     else:
         return render_template('index.html')
